@@ -2,10 +2,10 @@
 
 /*
 Plugin Name: WPML REST API
-Version: 2.0.1
+Version: 3.1
 Description: Adds links to posts in other languages into the results of a WP REST API query for sites running the WPML plugin.
-Author: Shawn Hooper
-Author URI: https://profiles.wordpress.org/shooper
+Author: Alan Frigo
+Author URI: https://github.com/alanfrigo
 */
 
 namespace ShawnHooper\WPML;
@@ -297,6 +297,87 @@ class WPML_REST_API
         }
     
         $this->translations[$language['default_locale']] = apply_filters('wpmlrestapi_get_translation', $translation, $thisPost, $language);
+    }
+
+    public function __construct()
+    {
+        add_action('admin_menu', [$this, 'add_admin_menu']);
+        add_action('admin_init', [$this, 'register_settings']);
+        add_action('save_post', [$this, 'post_to_external_endpoint'], 10, 3);
+    }
+
+    public function post_to_external_endpoint($post_id, $post, $update)
+    {
+        if (wp_is_post_revision($post_id) || $post->post_status !== 'publish') {
+            return;
+        }
+
+        $enabled = get_option('wpml_rest_api_enable_post_request');
+        $endpoint = get_option('wpml_rest_api_post_endpoint');
+
+        if ($enabled && $endpoint) {
+            $response = wp_remote_post($endpoint, [
+                'body' => json_encode([
+                    'post_id' => $post_id,
+                    'post_title' => $post->post_title,
+                    'post_content' => $post->post_content,
+                ]),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+
+            if (is_wp_error($response)) {
+                error_log('Erro ao enviar requisição POST: ' . $response->get_error_message());
+            }
+        }
+    }
+
+    public function add_admin_menu()
+    {
+        add_options_page(
+            'WPML REST API Config',
+            'WPML REST API',
+            'manage_options',
+            'wpml-rest-api',
+            [$this, 'settings_page']
+        );
+    }
+
+    public function register_settings()
+    {
+        register_setting('wpml_rest_api_settings', 'wpml_rest_api_enable_post_request');
+        register_setting('wpml_rest_api_settings', 'wpml_rest_api_post_endpoint');
+    }
+
+    public function settings_page()
+    {
+        ?>
+        <div class="wrap">
+            <h1>WPML REST API Config</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('wpml_rest_api_settings');
+                do_settings_sections('wpml_rest_api_settings');
+                ?>
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row">Enable POST request for new posts</th>
+                        <td>
+                            <input type="checkbox" name="wpml_rest_api_enable_post_request" value="1" <?php checked(1, get_option('wpml_rest_api_enable_post_request'), true); ?> />
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Webhook URL</th>
+                        <td>
+                            <input type="text" name="wpml_rest_api_post_endpoint" value="<?php echo esc_attr(get_option('wpml_rest_api_post_endpoint')); ?>" class="regular-text" />
+                        </td>
+                    </tr>
+                </table>
+                <?php submit_button(); ?>
+            </form>
+        </div>
+        <?php
     }
 }
 
