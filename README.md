@@ -14,6 +14,7 @@ The WPML REST API is a WordPress plugin that adds links to posts in other langua
 * Adds `wpml_translations` field to REST API responses, showing the available translations for the post.
 * Allows updating the current language of the post.
 * Allows updating the post's translations.
+* Allow to enable a POST request for every blog post created.
 
 ## Installation
 
@@ -25,7 +26,7 @@ To install the WPML REST API, follow these steps:
 
 ## Configuration
 
-The plugin does not require additional configuration, as it is designed to work with WPML by default.
+For the feature that calls a POST Request for every blog post created, you can setup via Settings>WMPL REST API
 
 ## Usage
 
