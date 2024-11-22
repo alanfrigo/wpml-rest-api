@@ -14,7 +14,6 @@ The WPML REST API is a WordPress plugin that adds links to posts in other langua
 * Adds `wpml_translations` field to REST API responses, showing the available translations for the post.
 * Allows updating the current language of the post.
 * Allows updating the post's translations.
-* Allow to enable a POST request for every blog post created.
 
 ## Installation
 
@@ -26,48 +25,48 @@ To install the WPML REST API, follow these steps:
 
 ## Configuration
 
-For the feature that calls a POST Request for every blog post created, you can setup via Settings>WMPL REST API
+The plugin does not require additional configuration, as it is designed to work with WPML by default.
 
 ## Usage
 
 ### Get the current language of the post
 
-To get the current language of the post, use the REST API `posts/{post_id}/wpml-current-locale`.
+To get the current language of the post, use the REST API `posts/{post_id}`.
 
 Example:
 ```json
-GET /wp-json/wp/v2/posts/123/wpml-current-locale
+GET /wp-json/wp/v2/posts/123
 ```
 ### Get the post's translations
 
-To get the post's translations, use the REST API `posts/{post_id}/wpml-translations`.
+To get the post's translations, use the REST API `posts/{post_id}`.
 
 Example:
 ```json
-GET /wp-json/wp/v2/posts/123/wpml-translations
+GET /wp-json/wp/v2/posts/123
 ```
 ### Update the current language of the post
 
-To update the current language of the post, use the REST API `posts/{post_id}/wpml-update-locale`.
+To update the current language of the post, use the REST API `posts/{post_id}`.
 
 Example:
 ```json
-POST /wp-json/wp/v2/posts/123/wpml-update-locale
+POST /wp-json/wp/v2/posts/123
 {
-  "locale": "pt_BR"
+  "wpml_current_locale": "pt_BR"
 }
 ```
 ### Update the post's translations
 
-To update the post's translations, use the REST API `posts/{post_id}/wpml-update-translations`.
+To update the post's translations, use the REST API `posts/{post_id}`.
 
 Example:
 ```json
-POST /wp-json/wp/v2/posts/123/wpml-update-translations
+POST /wp-json/wp/v2/posts/123
 {
-  "translations": {
-    "pt_BR": 456,
-    "fr_FR": 789
+  "wpml_translations": {
+    "pt_BR": 456, //Post ID in pt_BR,
+    "fr_FR": 789 //Post ID in fr_FR
   }
 }
 ```
